@@ -135,17 +135,45 @@ export default function DashboardPage() {
     }
   };
 
-  // 통계 계산
+  // 통계 계산 (이번 달 지출)
   const thisMonthExpenses = expenses.filter((expense) => {
-    const expenseDate = new Date(expense.expense_date);
-    const now = new Date();
-    return (
-      expenseDate.getMonth() === now.getMonth() &&
-      expenseDate.getFullYear() === now.getFullYear()
-    );
+    try {
+      // expense_date가 문자열 형식 (YYYY-MM-DD)인 경우 안전하게 파싱
+      const expenseDateStr = expense.expense_date;
+      if (!expenseDateStr) return false;
+
+      // YYYY-MM-DD 형식에서 년/월 추출
+      const [year, month] = expenseDateStr.split('-').map(Number);
+      if (!year || !month) return false;
+
+      // 현재 날짜의 년/월
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1; // getMonth()는 0부터 시작하므로 +1
+
+      // 년/월 비교
+      return year === currentYear && month === currentMonth;
+    } catch (error) {
+      console.error('날짜 파싱 오류:', expense.expense_date, error);
+      return false;
+    }
   });
 
   const totalAmount = thisMonthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+  // 디버깅용 로그 (개발 환경에서만)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('통계 계산:', {
+      전체건수: expenses.length,
+      이번달건수: thisMonthExpenses.length,
+      이번달총액: totalAmount,
+      현재날짜: new Date().toISOString().split('T')[0],
+      이번달지출: thisMonthExpenses.map((e) => ({
+        날짜: e.expense_date,
+        금액: e.amount,
+      })),
+    });
+  }
 
   return (
     <DashboardLayout>
