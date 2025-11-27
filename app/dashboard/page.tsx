@@ -13,9 +13,17 @@ import ExpenseCard from "@/components/ExpenseCard";
 import ExpenseListItem from "@/components/ExpenseListItem";
 import ExpenseListSkeleton from "@/components/ExpenseListSkeleton";
 import StatCardSkeleton from "@/components/StatCardSkeleton";
+import UploadHistorySkeleton from "@/components/UploadHistorySkeleton";
+import FileUpload from "@/components/ui/FileUpload";
+import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
-import { Expense, ExpenseFormData } from "@/lib/types";
-import { formatCurrency, sanitizeFileName, resizeImage } from "@/lib/utils";
+import { Expense, ExpenseFormData, CardUpload } from "@/lib/types";
+import {
+  formatCurrency,
+  sanitizeFileName,
+  resizeImage,
+  formatDate,
+} from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -28,6 +36,12 @@ export default function DashboardPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [viewType, setViewType] = useState<"card" | "list">("card"); // 기본값으로 시작 (서버와 동일)
   const [isClient, setIsClient] = useState(false);
+  // 카드내역 업로드 관련 state
+  const [cardUploads, setCardUploads] = useState<CardUpload[]>([]);
+  const [cardUploadLoading, setCardUploadLoading] = useState(true);
+  const [cardUploading, setCardUploading] = useState(false);
+  const [cardUploadError, setCardUploadError] = useState<string | null>(null);
+  const [showCardUpload, setShowCardUpload] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -44,6 +58,80 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchExpenses();
   }, []);
+
+  // 카드내역 업로드 목록 불러오기
+  const fetchCardUploads = async () => {
+    try {
+      const response = await fetch("/api/card-uploads", {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("목록을 불러오는데 실패했습니다.");
+      const data = await response.json();
+      setCardUploads(data);
+    } catch (error) {
+      console.error("카드내역 업로드 목록 조회 오류:", error);
+    } finally {
+      setCardUploadLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCardUploads();
+  }, []);
+
+  // 카드내역 파일 업로드 처리
+  const handleCardFileSelect = async (file: File) => {
+    setCardUploading(true);
+    setCardUploadError(null);
+
+    try {
+      // Excel/CSV 파일만 허용
+      const allowedTypes = [
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "text/csv",
+      ];
+      const allowedExtensions = [".xls", ".xlsx", ".csv"];
+
+      const fileExtension = file.name
+        .substring(file.name.lastIndexOf("."))
+        .toLowerCase();
+      const isValidType =
+        allowedTypes.includes(file.type) ||
+        allowedExtensions.includes(fileExtension);
+
+      if (!isValidType) {
+        throw new Error(
+          "Excel (.xls, .xlsx) 또는 CSV 파일만 업로드 가능합니다."
+        );
+      }
+
+      // FormData 생성
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // API 호출
+      const response = await fetch("/api/card-uploads", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "업로드에 실패했습니다.");
+      }
+
+      // 성공 시 목록 새로고침 및 업로드 UI 닫기
+      await fetchCardUploads();
+      setShowCardUpload(false);
+      alert("카드내역이 업로드되었습니다.");
+    } catch (err: any) {
+      setCardUploadError(err.message || "업로드 중 오류가 발생했습니다.");
+    } finally {
+      setCardUploading(false);
+    }
+  };
 
   const fetchExpenses = async () => {
     try {
@@ -363,13 +451,6 @@ export default function DashboardPage() {
                     </svg>
                   </button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push("/dashboard/upload-card")}
-                >
-                  카드내역 업로드
-                </Button>
               </div>
             </div>
           </CardHeader>
@@ -391,6 +472,111 @@ export default function DashboardPage() {
                 {expenses.map((expense) => (
                   <ExpenseCard key={expense.id} expense={expense} />
                 ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 카드내역 업로드 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>카드내역 업로드</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!showCardUpload ? (
+              <Button onClick={() => setShowCardUpload(true)}>
+                카드내역 업로드하기
+              </Button>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  카드 승인내역 Excel 또는 CSV 파일을 업로드하세요. (추후 자동
+                  매칭 기능이 추가될 예정입니다)
+                </p>
+
+                <FileUpload
+                  onFileSelect={handleCardFileSelect}
+                  accept={{
+                    "application/vnd.ms-excel": [".xls"],
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                      [".xlsx"],
+                    "text/csv": [".csv"],
+                  }}
+                  maxSize={10 * 1024 * 1024} // 10MB
+                  disabled={cardUploading}
+                  description="Excel (.xls, .xlsx) 또는 CSV 파일 (최대 10MB)"
+                />
+
+                {cardUploadError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                    {cardUploadError}
+                  </div>
+                )}
+
+                {cardUploading && (
+                  <div className="text-sm text-gray-600">업로드 중...</div>
+                )}
+
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowCardUpload(false);
+                    setCardUploadError(null);
+                  }}
+                >
+                  취소
+                </Button>
+              </div>
+            )}
+
+            {/* 업로드 히스토리 */}
+            {!showCardUpload && (
+              <div className="mt-6">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">
+                  업로드 히스토리
+                </h4>
+                {cardUploadLoading ? (
+                  <UploadHistorySkeleton count={3} />
+                ) : cardUploads.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4 text-sm">
+                    아직 업로드한 카드내역이 없습니다.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {cardUploads.map((upload) => {
+                      const statusColors = {
+                        uploaded: "default",
+                        processing: "warning",
+                        completed: "success",
+                      } as const;
+
+                      const statusLabels = {
+                        uploaded: "업로드됨",
+                        processing: "처리 중",
+                        completed: "완료",
+                      };
+
+                      return (
+                        <div
+                          key={upload.id}
+                          className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 text-sm truncate">
+                              {upload.file_name}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {formatDate(upload.upload_date)}
+                            </p>
+                          </div>
+                          <Badge variant={statusColors[upload.status]}>
+                            {statusLabels[upload.status]}
+                          </Badge>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

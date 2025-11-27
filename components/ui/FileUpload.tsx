@@ -11,6 +11,7 @@ interface FileUploadProps {
   accept?: Record<string, string[]>;
   maxSize?: number;
   disabled?: boolean;
+  description?: string; // 파일 형식 설명 (기본값: 이미지/PDF)
 }
 
 export default function FileUpload({
@@ -18,6 +19,7 @@ export default function FileUpload({
   accept = { "image/*": [], "application/pdf": [".pdf"] }, // 이미지 및 PDF 허용
   maxSize = 10 * 1024 * 1024, // 10MB로 증가
   disabled = false,
+  description,
 }: FileUploadProps) {
   const [error, setError] = useState<string | null>(null);
 
@@ -26,21 +28,86 @@ export default function FileUpload({
       if (acceptedFiles.length === 0) return;
 
       const file = acceptedFiles[0];
-      const validation = validateImageFile(file);
 
-      if (!validation.valid) {
-        setError(validation.error || "파일 업로드에 실패했습니다.");
-        return;
+      // accept prop이 기본값(이미지/PDF)인 경우에만 validateImageFile 사용
+      const isDefaultAccept =
+        JSON.stringify(accept) ===
+        JSON.stringify({ "image/*": [], "application/pdf": [".pdf"] });
+
+      if (isDefaultAccept) {
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+          setError(validation.error || "파일 업로드에 실패했습니다.");
+          return;
+        }
+      } else {
+        // 카드내역 업로드 등 다른 형식의 경우 파일 크기만 확인
+        const maxSizeBytes = maxSize || 10 * 1024 * 1024;
+        if (file.size > maxSizeBytes) {
+          setError(
+            `파일 크기가 너무 큽니다. 최대 ${Math.round(
+              maxSizeBytes / 1024 / 1024
+            )}MB까지 업로드 가능합니다.`
+          );
+          return;
+        }
       }
 
       setError(null);
       onFileSelect(file);
     },
-    [onFileSelect]
+    [onFileSelect, accept, maxSize]
+  );
+
+  const onDropRejected = useCallback(
+    (fileRejections: any[]) => {
+      if (fileRejections.length === 0) return;
+
+      const rejection = fileRejections[0];
+      const file = rejection.file;
+
+      // 파일 크기 초과
+      if (rejection.errors.some((e: any) => e.code === "file-too-large")) {
+        setError(
+          `파일 크기가 너무 큽니다. 최대 ${Math.round(
+            (maxSize || 10 * 1024 * 1024) / 1024 / 1024
+          )}MB까지 업로드 가능합니다.`
+        );
+        return;
+      }
+
+      // 지원하지 않는 파일 형식
+      if (rejection.errors.some((e: any) => e.code === "file-invalid-type")) {
+        // accept prop에 따라 다른 메시지 표시
+        const isExcelCsv =
+          accept &&
+          (accept["application/vnd.ms-excel"] ||
+            accept[
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ] ||
+            accept["text/csv"]);
+
+        if (isExcelCsv) {
+          setError(
+            `지원하지 않는 파일 형식입니다. Excel (.xls, .xlsx) 또는 CSV 파일만 업로드 가능합니다. (선택한 파일: ${file.name})`
+          );
+        } else {
+          setError(
+            `지원하지 않는 파일 형식입니다. 이미지 파일 또는 PDF만 업로드 가능합니다. (선택한 파일: ${file.name})`
+          );
+        }
+        return;
+      }
+
+      // 기타 오류
+      setError(rejection.errors[0]?.message || "파일 업로드에 실패했습니다.");
+    },
+    [accept, maxSize]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+    onDropRejected,
     accept,
     maxSize,
     disabled,
@@ -82,7 +149,8 @@ export default function FileUpload({
               : "파일을 드래그하거나 클릭하여 업로드"}
           </p>
           <p className="text-xs text-gray-500">
-            이미지 파일 또는 PDF (최대 10MB, HEIC/PDF 자동 변환 지원)
+            {description ||
+              "이미지 파일 또는 PDF (최대 10MB, HEIC/PDF 자동 변환 지원)"}
           </p>
         </div>
       </div>
