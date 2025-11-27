@@ -197,3 +197,107 @@ export function sanitizeFileName(fileName: string): string {
 
   return `${finalName}${extension}`;
 }
+
+// 이미지 리사이징 함수 (용량 최적화)
+export async function resizeImage(
+  file: File,
+  maxWidth: number = 1920,
+  maxHeight: number = 1920,
+  quality: number = 0.85
+): Promise<File> {
+  return new Promise((resolve, reject) => {
+    // 이미지 파일인지 확인
+    if (!file.type.startsWith("image/")) {
+      resolve(file); // 이미지가 아니면 원본 반환
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        // 원본 크기 확인
+        const originalWidth = img.width;
+        const originalHeight = img.height;
+
+        // 리사이징 필요 여부 확인
+        if (originalWidth <= maxWidth && originalHeight <= maxHeight) {
+          // 리사이징 불필요하면 원본 반환
+          resolve(file);
+          return;
+        }
+
+        // 비율 유지하며 리사이징
+        let width = originalWidth;
+        let height = originalHeight;
+
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        if (height > maxHeight) {
+          width = (width * maxHeight) / height;
+          height = maxHeight;
+        }
+
+        // Canvas 생성
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+          reject(new Error("Canvas context를 가져올 수 없습니다."));
+          return;
+        }
+
+        // 이미지 그리기 (고품질 리샘플링)
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Canvas를 Blob으로 변환
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("이미지 리사이징에 실패했습니다."));
+              return;
+            }
+
+            // Blob을 File로 변환
+            const resizedFile = new File(
+              [blob],
+              file.name,
+              {
+                type: file.type || "image/jpeg",
+                lastModified: Date.now(),
+              }
+            );
+
+            console.log(
+              `이미지 리사이징 완료: ${originalWidth}x${originalHeight} → ${width}x${height}, ` +
+              `원본: ${(file.size / 1024).toFixed(2)}KB → 리사이즈: ${(resizedFile.size / 1024).toFixed(2)}KB`
+            );
+
+            resolve(resizedFile);
+          },
+          file.type || "image/jpeg",
+          quality
+        );
+      };
+
+      img.onerror = () => {
+        reject(new Error("이미지를 로드할 수 없습니다."));
+      };
+
+      img.src = e.target?.result as string;
+    };
+
+    reader.onerror = () => {
+      reject(new Error("파일을 읽을 수 없습니다."));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
