@@ -48,8 +48,8 @@ export default function Home() {
               src="/logo.svg"
               alt="경비 처리 자동화"
               width={120}
-              height={120}
-              className="h-30 w-auto"
+              height={111}
+              style={{ height: "7.5rem", width: "auto" }}
             />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">

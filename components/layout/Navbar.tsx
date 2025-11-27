@@ -38,8 +38,8 @@ export default function Navbar() {
               src="/logo.svg"
               alt="경비 처리 자동화"
               width={40}
-              height={40}
-              className="h-10 w-auto"
+              height={37}
+              style={{ height: "2.5rem", width: "auto" }}
             />
             <span className="text-xl font-bold text-gray-900">경비 처리 자동화</span>
           </Link>
