@@ -40,6 +40,7 @@ export default function Navbar() {
               width={40}
               height={37}
               style={{ height: "2.5rem", width: "auto" }}
+              priority
             />
             <span className="text-xl font-bold text-gray-900">경비 처리 자동화</span>
           </Link>

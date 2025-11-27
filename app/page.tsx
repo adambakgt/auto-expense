@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import Navbar from '@/components/layout/Navbar';
-import { createClient } from '@/lib/supabase/client';
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import Navbar from "@/components/layout/Navbar";
+import { createClient } from "@/lib/supabase/client";
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -35,7 +35,7 @@ export default function Home() {
   }, [supabase.auth]);
 
   const handleDashboardClick = () => {
-    router.push('/dashboard');
+    router.push("/dashboard");
   };
 
   return (
@@ -50,6 +50,7 @@ export default function Home() {
               width={120}
               height={111}
               style={{ height: "7.5rem", width: "auto" }}
+              priority
             />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -88,4 +89,3 @@ export default function Home() {
     </div>
   );
 }
-
