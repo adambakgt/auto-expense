@@ -45,6 +45,9 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  /* Safari 모바일 텍스트 색상 강제 */
+  -webkit-text-fill-color: #171717;
+  color-scheme: light;
 }
 
 /* 입력 필드 사파리 스타일 리셋 */
@@ -87,6 +90,42 @@ div,
 label {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Safari 모바일 텍스트 색상 강제 적용 */
+/* Safari는 때때로 텍스트 색상을 투명하게 렌더링하므로 명시적으로 설정 */
+.text-gray-900,
+.text-gray-800,
+.text-gray-700,
+.text-gray-600 {
+  -webkit-text-fill-color: inherit;
+  color: inherit;
+}
+
+/* Safari에서 text-gray-900이 제대로 보이도록 강제 */
+.text-gray-900 {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+.text-gray-800 {
+  color: #1f2937 !important;
+  -webkit-text-fill-color: #1f2937 !important;
+}
+
+.text-gray-700 {
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
+}
+
+.text-gray-600 {
+  color: #4b5563 !important;
+  -webkit-text-fill-color: #4b5563 !important;
+}
+
+.text-gray-500 {
+  color: #6b7280 !important;
+  -webkit-text-fill-color: #6b7280 !important;
 }
 
 /* 버튼 터치 영역 개선 (모바일) */
