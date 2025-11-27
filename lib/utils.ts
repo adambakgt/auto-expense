@@ -63,8 +63,9 @@ export async function convertPdfToImage(file: File): Promise<File> {
     }
 
     // pdfjs-dist를 동적으로 import
+    // webpack externals 설정으로 번들링 회피, 런타임에 로드
     const pdfjsLib = await import("pdfjs-dist");
-    
+
     // Worker 설정 (CDN 사용)
     if (pdfjsLib.GlobalWorkerOptions) {
       // Worker를 CDN에서 로드
@@ -184,7 +185,8 @@ export function sanitizeFileName(fileName: string): string {
   // 파일 확장자 추출
   const lastDotIndex = fileName.lastIndexOf(".");
   const extension = lastDotIndex !== -1 ? fileName.slice(lastDotIndex) : "";
-  const nameWithoutExt = lastDotIndex !== -1 ? fileName.slice(0, lastDotIndex) : fileName;
+  const nameWithoutExt =
+    lastDotIndex !== -1 ? fileName.slice(0, lastDotIndex) : fileName;
 
   // 한글 및 특수문자를 제거하고 영문/숫자/하이픈/언더스코어만 유지
   const sanitized = nameWithoutExt
@@ -266,18 +268,16 @@ export async function resizeImage(
             }
 
             // Blob을 File로 변환
-            const resizedFile = new File(
-              [blob],
-              file.name,
-              {
-                type: file.type || "image/jpeg",
-                lastModified: Date.now(),
-              }
-            );
+            const resizedFile = new File([blob], file.name, {
+              type: file.type || "image/jpeg",
+              lastModified: Date.now(),
+            });
 
             console.log(
               `이미지 리사이징 완료: ${originalWidth}x${originalHeight} → ${width}x${height}, ` +
-              `원본: ${(file.size / 1024).toFixed(2)}KB → 리사이즈: ${(resizedFile.size / 1024).toFixed(2)}KB`
+                `원본: ${(file.size / 1024).toFixed(2)}KB → 리사이즈: ${(
+                  resizedFile.size / 1024
+                ).toFixed(2)}KB`
             );
 
             resolve(resizedFile);
