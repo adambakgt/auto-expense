@@ -6,7 +6,6 @@ import { useState } from 'react';
 import FileUpload from './ui/FileUpload';
 import LoadingOverlay from './ui/LoadingOverlay';
 import { ExpenseFormData } from '@/lib/types';
-import heic2any from 'heic2any';
 
 interface ReceiptUploadZoneProps {
   onAnalysisComplete: (data: ExpenseFormData, file: File) => void;
@@ -35,6 +34,8 @@ export default function ReceiptUploadZone({ onAnalysisComplete }: ReceiptUploadZ
       if (isHeic) {
         try {
           console.log('HEIC 파일 감지, JPEG로 변환 중...');
+          // heic2any는 클라이언트 전용이므로 동적 import 사용
+          const heic2any = (await import('heic2any')).default;
           // heic2any는 Blob 배열을 반환하므로 첫 번째 항목 사용
           const convertedBlob = await heic2any({
             blob: file,

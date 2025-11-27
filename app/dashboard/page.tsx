@@ -1,6 +1,8 @@
 'use client';
 
 // 통합 대시보드 페이지
+// 동적 렌더링 강제 (클라이언트 전용 라이브러리 사용으로 인해)
+export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
