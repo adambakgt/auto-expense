@@ -66,7 +66,7 @@ export default function DashboardPage() {
       if (error) {
         console.error('Storage 업로드 오류:', {
           error: error.message,
-          statusCode: error.statusCode,
+          errorDetails: error,
           fileName,
           userId: user.id,
         });
