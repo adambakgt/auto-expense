@@ -11,14 +11,27 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
 
+    // 인증 오류 로깅
+    if (authError) {
+      console.error("인증 오류:", authError);
+    }
+
     if (!user) {
+      console.error("사용자 인증 실패 - 사용자 정보 없음");
+      // 쿠키 정보 확인 (디버깅용)
+      const cookieHeader = request.headers.get("cookie");
+      console.log("요청 쿠키:", cookieHeader ? "쿠키 존재" : "쿠키 없음");
+
       return NextResponse.json(
-        { error: "인증이 필요합니다." },
+        { error: "인증이 필요합니다. 로그인 후 다시 시도해주세요." },
         { status: 401 }
       );
     }
+
+    console.log("인증 성공:", user.id);
 
     // 요청 본문 파싱
     const formData = await request.formData();

@@ -35,7 +35,9 @@ export default function DashboardPage() {
 
   const fetchExpenses = async () => {
     try {
-      const response = await fetch('/api/expenses');
+      const response = await fetch('/api/expenses', {
+        credentials: 'include', // 쿠키를 포함하여 인증 정보 전달
+      });
       if (!response.ok) throw new Error('목록을 불러오는데 실패했습니다.');
       const data = await response.json();
       setExpenses(data);
@@ -136,6 +138,7 @@ export default function DashboardPage() {
           ...data,
           status: 'submitted',
         }),
+        credentials: 'include', // 쿠키를 포함하여 인증 정보 전달
       });
 
       if (!response.ok) {

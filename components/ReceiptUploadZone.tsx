@@ -82,10 +82,11 @@ export default function ReceiptUploadZone({ onAnalysisComplete }: ReceiptUploadZ
       const formData = new FormData();
       formData.append('file', fileToUpload);
 
-      // OCR API 호출
+      // OCR API 호출 (쿠키 포함)
       const response = await fetch('/api/ocr', {
         method: 'POST',
         body: formData,
+        credentials: 'include', // 쿠키를 포함하여 인증 정보 전달
       });
 
       if (!response.ok) {
