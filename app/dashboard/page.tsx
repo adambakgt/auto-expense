@@ -12,7 +12,7 @@ import ExpenseForm from '@/components/ExpenseForm';
 import ExpenseCard from '@/components/ExpenseCard';
 import Button from '@/components/ui/Button';
 import { Expense, ExpenseFormData } from '@/lib/types';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, sanitizeFileName } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -54,8 +54,10 @@ export default function DashboardPage() {
 
       if (!user) throw new Error('인증이 필요합니다.');
 
-      // 파일명 생성 (타임스탬프 + 원본 파일명)
-      const fileName = `${user.id}/${Date.now()}_${file.name}`;
+      // 파일명 생성 (타임스탬프 + 안전한 파일명)
+      // 한글 및 특수문자를 제거하여 URL-safe하게 처리
+      const safeFileName = sanitizeFileName(file.name);
+      const fileName = `${user.id}/${Date.now()}_${safeFileName}`;
 
       // Supabase Storage에 업로드
       const { data, error } = await supabase.storage

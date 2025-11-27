@@ -178,3 +178,22 @@ export function fileToBase64(file: File): Promise<string> {
     reader.onerror = (error) => reject(error);
   });
 }
+
+// 파일명을 URL-safe하게 변환 (한글 및 특수문자 처리)
+export function sanitizeFileName(fileName: string): string {
+  // 파일 확장자 추출
+  const lastDotIndex = fileName.lastIndexOf(".");
+  const extension = lastDotIndex !== -1 ? fileName.slice(lastDotIndex) : "";
+  const nameWithoutExt = lastDotIndex !== -1 ? fileName.slice(0, lastDotIndex) : fileName;
+
+  // 한글 및 특수문자를 제거하고 영문/숫자/하이픈/언더스코어만 유지
+  const sanitized = nameWithoutExt
+    .replace(/[^a-zA-Z0-9_-]/g, "_") // 영문, 숫자, 하이픈, 언더스코어 외의 문자를 언더스코어로 변경
+    .replace(/_+/g, "_") // 연속된 언더스코어를 하나로
+    .replace(/^_|_$/g, ""); // 앞뒤 언더스코어 제거
+
+  // 빈 문자열이면 기본값 사용
+  const finalName = sanitized || "file";
+
+  return `${finalName}${extension}`;
+}
