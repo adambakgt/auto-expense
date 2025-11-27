@@ -75,6 +75,17 @@ input[type="url"],
 textarea,
 select {
   font-size: 16px; /* 16px 이상이면 사파리가 자동 줌하지 않음 */
+  /* Safari 모바일에서 input 텍스트 색상 강제 */
+  color: #111827;
+  -webkit-text-fill-color: #111827;
+}
+
+/* Safari에서 input placeholder 색상 */
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+  -webkit-text-fill-color: #9ca3af;
+  opacity: 1;
 }
 
 /* 텍스트 가독성 개선 */
@@ -94,38 +105,43 @@ label {
 
 /* Safari 모바일 텍스트 색상 강제 적용 */
 /* Safari는 때때로 텍스트 색상을 투명하게 렌더링하므로 명시적으로 설정 */
-.text-gray-900,
-.text-gray-800,
-.text-gray-700,
-.text-gray-600 {
-  -webkit-text-fill-color: inherit;
-  color: inherit;
-}
+/* 본문 텍스트(p, span 등)에만 적용하고, 제목(h1-h6)과 버튼은 제외 */
+@supports (-webkit-touch-callout: none) {
+  /* Safari만 타겟팅 */
+  p.text-gray-900,
+  span.text-gray-900,
+  div.text-gray-900:not([class*="font-bold"]):not([class*="font-semibold"]):not([class*="CardTitle"]) {
+    color: #111827;
+    -webkit-text-fill-color: #111827;
+  }
 
-/* Safari에서 text-gray-900이 제대로 보이도록 강제 */
-.text-gray-900 {
-  color: #111827 !important;
-  -webkit-text-fill-color: #111827 !important;
-}
+  p.text-gray-800,
+  span.text-gray-800,
+  div.text-gray-800:not([class*="font-bold"]):not([class*="font-semibold"]):not([class*="CardTitle"]) {
+    color: #1f2937;
+    -webkit-text-fill-color: #1f2937;
+  }
 
-.text-gray-800 {
-  color: #1f2937 !important;
-  -webkit-text-fill-color: #1f2937 !important;
-}
+  p.text-gray-700,
+  span.text-gray-700,
+  div.text-gray-700:not([class*="font-bold"]):not([class*="font-semibold"]):not([class*="CardTitle"]) {
+    color: #374151;
+    -webkit-text-fill-color: #374151;
+  }
 
-.text-gray-700 {
-  color: #374151 !important;
-  -webkit-text-fill-color: #374151 !important;
-}
+  p.text-gray-600,
+  span.text-gray-600,
+  div.text-gray-600:not([class*="font-bold"]):not([class*="font-semibold"]):not([class*="CardTitle"]) {
+    color: #4b5563;
+    -webkit-text-fill-color: #4b5563;
+  }
 
-.text-gray-600 {
-  color: #4b5563 !important;
-  -webkit-text-fill-color: #4b5563 !important;
-}
-
-.text-gray-500 {
-  color: #6b7280 !important;
-  -webkit-text-fill-color: #6b7280 !important;
+  p.text-gray-500,
+  span.text-gray-500,
+  div.text-gray-500:not([class*="font-bold"]):not([class*="font-semibold"]):not([class*="CardTitle"]) {
+    color: #6b7280;
+    -webkit-text-fill-color: #6b7280;
+  }
 }
 
 /* 버튼 터치 영역 개선 (모바일) */
@@ -133,6 +149,26 @@ button,
 a {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
   touch-action: manipulation;
+}
+
+/* 모든 브라우저에서 버튼 텍스트 색상 강제 */
+/* text-white 클래스가 있는 모든 버튼 (기본 버튼) */
+button.text-white {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* text-gray-700 클래스가 있는 버튼 (outline, ghost) */
+button.text-gray-700:not(.text-white) {
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
+}
+
+/* bg-blue-600이 있는 버튼은 무조건 흰색 텍스트 */
+button.bg-blue-600,
+button[class*="bg-blue-600"] {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 @layer utilities {
