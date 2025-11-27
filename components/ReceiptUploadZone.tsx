@@ -2,9 +2,11 @@
 
 // 영수증 업로드 영역 컴포넌트
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FileUpload from './ui/FileUpload';
 import LoadingOverlay from './ui/LoadingOverlay';
+import Button from './ui/Button';
+import Skeleton from './ui/Skeleton';
 import { ExpenseFormData } from '@/lib/types';
 import { convertPdfToImage } from '@/lib/utils';
 
@@ -14,11 +16,18 @@ interface ReceiptUploadZoneProps {
 
 export default function ReceiptUploadZone({ onAnalysisComplete }: ReceiptUploadZoneProps) {
   const [loading, setLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
 
+  // 파일 선택 시 미리보기만 표시
   const handleFileSelect = async (file: File) => {
     setLoading(true);
     setError(null);
+    setSelectedFile(null);
+    setPreviewUrl(null);
 
     try {
       let fileToUpload = file;
@@ -78,9 +87,29 @@ export default function ReceiptUploadZone({ onAnalysisComplete }: ReceiptUploadZ
         }
       }
 
+      // 파일 저장 및 미리보기 생성
+      setSelectedFile(fileToUpload);
+      const url = URL.createObjectURL(fileToUpload);
+      setPreviewUrl(url);
+      setImageLoading(true);
+    } catch (err: any) {
+      setError(err.message || '파일 처리 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // AI 분석 시작
+  const handleAnalyze = async () => {
+    if (!selectedFile) return;
+
+    setAnalyzing(true);
+    setError(null);
+
+    try {
       // FormData 생성
       const formData = new FormData();
-      formData.append('file', fileToUpload);
+      formData.append('file', selectedFile);
 
       // OCR API 호출 (쿠키 포함)
       const response = await fetch('/api/ocr', {
@@ -114,19 +143,78 @@ export default function ReceiptUploadZone({ onAnalysisComplete }: ReceiptUploadZ
 
       console.log('폼 데이터 준비 완료:', expenseFormData);
       console.log('onAnalysisComplete 호출 전');
-      onAnalysisComplete(expenseFormData, fileToUpload);
+      onAnalysisComplete(expenseFormData, selectedFile);
       console.log('onAnalysisComplete 호출 후');
     } catch (err: any) {
       setError(err.message || '영수증 분석 중 오류가 발생했습니다.');
     } finally {
-      setLoading(false);
+      setAnalyzing(false);
     }
   };
 
+  // 미리보기 URL 클린업
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   return (
     <>
-      {loading && <LoadingOverlay message="AI가 영수증을 분석하고 있습니다..." />}
-      <FileUpload onFileSelect={handleFileSelect} disabled={loading} />
+      {analyzing && <LoadingOverlay message="AI가 영수증을 분석하고 있습니다..." />}
+      
+      {!previewUrl ? (
+        <FileUpload onFileSelect={handleFileSelect} disabled={loading || analyzing} />
+      ) : (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              업로드된 영수증 이미지
+            </label>
+            <div className="relative border border-gray-200 rounded-md overflow-hidden bg-gray-50">
+              {imageLoading && (
+                <div className="flex items-center justify-center" style={{ minHeight: '200px' }}>
+                  <Skeleton className="w-full h-64" variant="rectangular" />
+                </div>
+              )}
+              <img
+                src={previewUrl}
+                alt="영수증 미리보기"
+                className={`max-w-full h-auto mx-auto ${imageLoading ? 'hidden' : ''}`}
+                style={{ maxHeight: '400px' }}
+                onLoad={() => setImageLoading(false)}
+                onError={() => setImageLoading(false)}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1 text-center">
+              이미지를 확인한 후 분석을 시작하세요
+            </p>
+          </div>
+
+          <div className="flex space-x-3">
+            <Button onClick={handleAnalyze} disabled={analyzing || !selectedFile}>
+              {analyzing ? '분석 중...' : '분석 시작'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectedFile(null);
+                setPreviewUrl(null);
+                setError(null);
+                if (previewUrl) {
+                  URL.revokeObjectURL(previewUrl);
+                }
+              }}
+              disabled={analyzing}
+            >
+              다시 선택
+            </Button>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
           {error}
