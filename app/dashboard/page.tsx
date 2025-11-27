@@ -261,6 +261,7 @@ export default function DashboardPage() {
                     setReceiptFile(null);
                     setShowUpload(false);
                   }}
+                  receiptImageFile={receiptFile || undefined}
                 />
               </div>
             )}

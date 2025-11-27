@@ -163,6 +163,7 @@ export default function ExpenseDetailPage() {
                 onSubmit={handleUpdate}
                 onCancel={() => setEditing(false)}
                 submitLabel="수정 완료"
+                receiptImageUrl={expense.receipt_image_url || undefined}
               />
             </CardContent>
           </Card>
