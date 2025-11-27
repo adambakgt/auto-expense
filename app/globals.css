@@ -110,35 +110,45 @@ label {
   /* Safari만 타겟팅 */
   p.text-gray-900,
   span.text-gray-900,
-  div.text-gray-900:not([class*="font-bold"]):not([class*="font-semibold"]):not([class*="CardTitle"]) {
+  div.text-gray-900:not([class*="font-bold"]):not([class*="font-semibold"]):not(
+      [class*="CardTitle"]
+    ) {
     color: #111827;
     -webkit-text-fill-color: #111827;
   }
 
   p.text-gray-800,
   span.text-gray-800,
-  div.text-gray-800:not([class*="font-bold"]):not([class*="font-semibold"]):not([class*="CardTitle"]) {
+  div.text-gray-800:not([class*="font-bold"]):not([class*="font-semibold"]):not(
+      [class*="CardTitle"]
+    ) {
     color: #1f2937;
     -webkit-text-fill-color: #1f2937;
   }
 
   p.text-gray-700,
   span.text-gray-700,
-  div.text-gray-700:not([class*="font-bold"]):not([class*="font-semibold"]):not([class*="CardTitle"]) {
+  div.text-gray-700:not([class*="font-bold"]):not([class*="font-semibold"]):not(
+      [class*="CardTitle"]
+    ) {
     color: #374151;
     -webkit-text-fill-color: #374151;
   }
 
   p.text-gray-600,
   span.text-gray-600,
-  div.text-gray-600:not([class*="font-bold"]):not([class*="font-semibold"]):not([class*="CardTitle"]) {
+  div.text-gray-600:not([class*="font-bold"]):not([class*="font-semibold"]):not(
+      [class*="CardTitle"]
+    ) {
     color: #4b5563;
     -webkit-text-fill-color: #4b5563;
   }
 
   p.text-gray-500,
   span.text-gray-500,
-  div.text-gray-500:not([class*="font-bold"]):not([class*="font-semibold"]):not([class*="CardTitle"]) {
+  div.text-gray-500:not([class*="font-bold"]):not([class*="font-semibold"]):not(
+      [class*="CardTitle"]
+    ) {
     color: #6b7280;
     -webkit-text-fill-color: #6b7280;
   }
@@ -151,22 +161,33 @@ a {
   touch-action: manipulation;
 }
 
-/* 모든 브라우저에서 버튼 텍스트 색상 강제 */
-/* text-white 클래스가 있는 모든 버튼 (기본 버튼) */
-button.text-white {
+/* 모든 브라우저에서 버튼 및 링크 텍스트 색상 강제 */
+/* text-white 클래스가 있는 모든 버튼/링크 (기본 버튼) */
+button.text-white,
+a.text-white {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
 
-/* text-gray-700 클래스가 있는 버튼 (outline, ghost) */
-button.text-gray-700:not(.text-white) {
+/* text-gray-800 클래스가 있는 버튼/링크 */
+button.text-gray-800,
+a.text-gray-800 {
+  color: #1f2937 !important;
+  -webkit-text-fill-color: #1f2937 !important;
+}
+
+/* text-gray-700 클래스가 있는 버튼/링크 (outline, ghost) */
+button.text-gray-700:not(.text-white),
+a.text-gray-700:not(.text-white) {
   color: #374151 !important;
   -webkit-text-fill-color: #374151 !important;
 }
 
-/* bg-blue-600이 있는 버튼은 무조건 흰색 텍스트 */
+/* bg-blue-600이 있는 버튼/링크는 무조건 흰색 텍스트 */
 button.bg-blue-600,
-button[class*="bg-blue-600"] {
+button[class*="bg-blue-600"],
+a.bg-blue-600,
+a[class*="bg-blue-600"] {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
