@@ -45,7 +45,22 @@ export async function POST(request: NextRequest) {
       "image/webp",
     ];
     const fileType = file.type.toLowerCase();
+    const fileName = file.name.toLowerCase();
     let finalMimeType = "image/png"; // 기본값은 PNG
+
+    // PDF 파일인지 확인
+    const isPdf = fileType === "application/pdf" || fileName.endsWith(".pdf");
+
+    // PDF 파일은 클라이언트에서 이미지로 변환되어 전송됨
+    // 서버에서는 PDF를 직접 처리하지 않음
+    if (isPdf) {
+      return NextResponse.json(
+        {
+          error: "PDF 파일은 클라이언트에서 이미지로 변환되어야 합니다.",
+        },
+        { status: 400 }
+      );
+    }
 
     // 지원되는 형식이면 그대로 사용
     if (supportedTypes.includes(fileType)) {

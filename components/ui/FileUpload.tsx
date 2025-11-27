@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
 // 파일 업로드 드롭존 컴포넌트
 
-import { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { validateImageFile } from '@/lib/utils';
+import { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { validateImageFile } from "@/lib/utils";
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -15,7 +15,7 @@ interface FileUploadProps {
 
 export default function FileUpload({
   onFileSelect,
-  accept = { 'image/*': [] }, // 모든 이미지 형식 허용
+  accept = { "image/*": [], "application/pdf": [".pdf"] }, // 이미지 및 PDF 허용
   maxSize = 10 * 1024 * 1024, // 10MB로 증가
   disabled = false,
 }: FileUploadProps) {
@@ -29,7 +29,7 @@ export default function FileUpload({
       const validation = validateImageFile(file);
 
       if (!validation.valid) {
-        setError(validation.error || '파일 업로드에 실패했습니다.');
+        setError(validation.error || "파일 업로드에 실패했습니다.");
         return;
       }
 
@@ -55,10 +55,10 @@ export default function FileUpload({
           border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
           ${
             isDragActive
-              ? 'border-blue-500 bg-blue-50'
-              : 'border-gray-300 hover:border-gray-400 bg-gray-50'
+              ? "border-blue-500 bg-blue-50"
+              : "border-gray-300 hover:border-gray-400 bg-gray-50"
           }
-          ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+          ${disabled ? "opacity-50 cursor-not-allowed" : ""}
         `}
       >
         <input {...getInputProps()} />
@@ -78,16 +78,15 @@ export default function FileUpload({
           </svg>
           <p className="text-sm text-gray-600">
             {isDragActive
-              ? '파일을 여기에 놓으세요'
-              : '파일을 드래그하거나 클릭하여 업로드'}
+              ? "파일을 여기에 놓으세요"
+              : "파일을 드래그하거나 클릭하여 업로드"}
           </p>
-          <p className="text-xs text-gray-500">이미지 파일 (최대 10MB, HEIC 자동 변환 지원)</p>
+          <p className="text-xs text-gray-500">
+            이미지 파일 또는 PDF (최대 10MB, HEIC/PDF 자동 변환 지원)
+          </p>
         </div>
       </div>
-      {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>
   );
 }
-

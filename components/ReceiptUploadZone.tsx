@@ -6,6 +6,7 @@ import { useState } from 'react';
 import FileUpload from './ui/FileUpload';
 import LoadingOverlay from './ui/LoadingOverlay';
 import { ExpenseFormData } from '@/lib/types';
+import { convertPdfToImage } from '@/lib/utils';
 
 interface ReceiptUploadZoneProps {
   onAnalysisComplete: (data: ExpenseFormData, file: File) => void;
@@ -22,9 +23,27 @@ export default function ReceiptUploadZone({ onAnalysisComplete }: ReceiptUploadZ
     try {
       let fileToUpload = file;
 
-      // HEIC/HEIF 형식이면 JPEG로 변환
       const fileType = file.type.toLowerCase();
       const fileName = file.name.toLowerCase();
+      
+      // PDF 파일인지 확인
+      const isPdf = 
+        fileType === 'application/pdf' ||
+        fileName.endsWith('.pdf');
+
+      // PDF 파일이면 클라이언트에서 이미지로 변환
+      if (isPdf) {
+        try {
+          console.log('PDF 파일 감지, 이미지로 변환 중...');
+          fileToUpload = await convertPdfToImage(file);
+          console.log('PDF → 이미지 변환 완료');
+        } catch (convertError: any) {
+          console.error('PDF 변환 오류:', convertError);
+          throw new Error('PDF 파일을 이미지로 변환할 수 없습니다. 다른 형식으로 변환 후 다시 시도해주세요.');
+        }
+      }
+      
+      // HEIC/HEIF 형식이면 JPEG로 변환
       const isHeic = 
         fileType.includes('heic') || 
         fileType.includes('heif') ||
