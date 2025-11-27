@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button';
 import { Expense, ExpenseFormData } from '@/lib/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import Badge from '@/components/ui/Badge';
+import ExpenseDetailSkeleton from '@/components/ExpenseDetailSkeleton';
 
 export default function ExpenseDetailPage() {
   const params = useParams();
@@ -95,7 +96,7 @@ export default function ExpenseDetailPage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <p className="text-gray-500">로딩 중...</p>
+        <ExpenseDetailSkeleton />
       </DashboardLayout>
     );
   }

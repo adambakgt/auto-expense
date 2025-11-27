@@ -10,6 +10,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import ReceiptUploadZone from '@/components/ReceiptUploadZone';
 import ExpenseForm from '@/components/ExpenseForm';
 import ExpenseCard from '@/components/ExpenseCard';
+import ExpenseListSkeleton from '@/components/ExpenseListSkeleton';
+import StatCardSkeleton from '@/components/StatCardSkeleton';
 import Button from '@/components/ui/Button';
 import { Expense, ExpenseFormData } from '@/lib/types';
 import { formatCurrency, sanitizeFileName, resizeImage } from '@/lib/utils';
@@ -196,22 +198,31 @@ export default function DashboardPage() {
       <div className="space-y-6">
         {/* 통계 카드 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>이번 달 지출 건수</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-gray-900">{thisMonthExpenses.length}건</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>이번 달 총 지출액</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-gray-900">{formatCurrency(totalAmount)}</p>
-            </CardContent>
-          </Card>
+          {loading ? (
+            <>
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </>
+          ) : (
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle>이번 달 지출 건수</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-gray-900">{thisMonthExpenses.length}건</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>이번 달 총 지출액</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-gray-900">{formatCurrency(totalAmount)}</p>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
 
         {/* 영수증 업로드 섹션 */}
@@ -269,7 +280,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <p className="text-gray-500">로딩 중...</p>
+              <ExpenseListSkeleton count={6} />
             ) : expenses.length === 0 ? (
               <p className="text-gray-500 text-center py-8">
                 아직 제출한 지출결의서가 없습니다.

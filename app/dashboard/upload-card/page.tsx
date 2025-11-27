@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button';
 import { CardUpload } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
 import Badge from '@/components/ui/Badge';
+import UploadHistorySkeleton from '@/components/UploadHistorySkeleton';
 
 export default function CardUploadPage() {
   const router = useRouter();
@@ -145,7 +146,7 @@ export default function CardUploadPage() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <p className="text-gray-500">로딩 중...</p>
+              <UploadHistorySkeleton count={3} />
             ) : uploads.length === 0 ? (
               <p className="text-gray-500 text-center py-8">
                 아직 업로드한 카드내역이 없습니다.
