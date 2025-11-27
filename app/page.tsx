@@ -1,6 +1,42 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
+import { createClient } from '@/lib/supabase/client';
 
 export default function Home() {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const router = useRouter();
+  const supabase = createClient();
+
+  useEffect(() => {
+    // 로그인 상태 확인
+    const checkAuth = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setIsLoggedIn(!!user);
+    };
+
+    checkAuth();
+
+    // 인증 상태 변경 감지
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsLoggedIn(!!session?.user);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase.auth]);
+
+  const handleDashboardClick = () => {
+    router.push('/dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -13,18 +49,29 @@ export default function Home() {
             영수증만 업로드하면 AI가 지출결의서를 자동으로 작성해드립니다
           </p>
           <div className="space-x-4">
-            <a
-              href="/login"
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-            >
-              로그인
-            </a>
-            <a
-              href="/signup"
-              className="inline-block bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 transition"
-            >
-              회원가입
-            </a>
+            {isLoggedIn ? (
+              <button
+                onClick={handleDashboardClick}
+                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+              >
+                대시보드로 이동
+              </button>
+            ) : (
+              <>
+                <a
+                  href="/login"
+                  className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+                >
+                  로그인
+                </a>
+                <a
+                  href="/signup"
+                  className="inline-block bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 transition"
+                >
+                  회원가입
+                </a>
+              </>
+            )}
           </div>
         </div>
       </div>
