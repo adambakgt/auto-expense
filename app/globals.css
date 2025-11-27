@@ -14,10 +14,86 @@
   }
 }
 
+/* 사파리 호환성 개선 */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* 모바일 사파리 주소창 높이 대응 */
+  height: -webkit-fill-available;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Pretendard Variable", Pretendard, "Noto Sans KR", "Segoe UI", Arial,
+    Helvetica, sans-serif;
+  /* 사파리에서 텍스트 선택 개선 */
+  -webkit-tap-highlight-color: transparent;
+  /* 모바일 사파리 주소창 높이 대응 */
+  min-height: -webkit-fill-available;
+  min-height: 100vh;
+  /* 레이아웃 안정성 */
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* 입력 필드 사파리 스타일 리셋 */
+input,
+textarea,
+select,
+button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* 사파리에서 input 자동 줌 방지 (모바일) */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+  font-size: 16px; /* 16px 이상이면 사파리가 자동 줌하지 않음 */
+}
+
+/* 텍스트 가독성 개선 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div,
+label {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 버튼 터치 영역 개선 (모바일) */
+button,
+a {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  touch-action: manipulation;
 }
 
 @layer utilities {
@@ -25,4 +101,3 @@ body {
     text-wrap: balance;
   }
 }
-
