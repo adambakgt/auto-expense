@@ -3,6 +3,7 @@
 // 네비게이션 바 컴포넌트
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
@@ -32,8 +33,15 @@ export default function Navbar() {
     <nav className="bg-white border-b border-gray-200">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="text-xl font-bold text-gray-900">
-            경비 처리 자동화
+          <Link href="/" className="flex items-center space-x-2">
+            <Image
+              src="/logo.svg"
+              alt="경비 처리 자동화"
+              width={40}
+              height={40}
+              className="h-10 w-auto"
+            />
+            <span className="text-xl font-bold text-gray-900">경비 처리 자동화</span>
           </Link>
 
           <div className="flex items-center space-x-4">

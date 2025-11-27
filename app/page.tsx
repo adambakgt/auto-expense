@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import { createClient } from '@/lib/supabase/client';
@@ -42,6 +43,15 @@ export default function Home() {
       <Navbar />
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/logo.svg"
+              alt="경비 처리 자동화"
+              width={120}
+              height={120}
+              className="h-30 w-auto"
+            />
+          </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             경비 처리 자동화
           </h1>
