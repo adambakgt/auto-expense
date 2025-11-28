@@ -24,7 +24,21 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 401 });
+      // 사용자 친화적인 에러 메시지로 변환
+      let userFriendlyMessage = error.message;
+
+      if (error.message === "Email not confirmed") {
+        userFriendlyMessage =
+          "이메일 인증이 완료되지 않았습니다. 회원가입 시 발송된 이메일을 확인하여 계정을 활성화해주세요.";
+      } else if (error.message === "Invalid login credentials") {
+        userFriendlyMessage = "이메일 또는 비밀번호가 올바르지 않습니다.";
+      } else if (error.message.includes("email")) {
+        userFriendlyMessage = "이메일 주소를 확인해주세요.";
+      } else if (error.message.includes("password")) {
+        userFriendlyMessage = "비밀번호를 확인해주세요.";
+      }
+
+      return NextResponse.json({ error: userFriendlyMessage }, { status: 401 });
     }
 
     // 세션 쿠키 설정을 위해 응답 헤더에 쿠키 추가
@@ -42,4 +56,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

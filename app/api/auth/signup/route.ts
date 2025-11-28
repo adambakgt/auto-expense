@@ -32,7 +32,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ user: data.user }, { status: 201 });
+    // 이메일 인증 필요 여부 확인
+    // Supabase는 이메일 인증이 활성화되어 있으면 session이 null이고 user가 생성됨
+    const requiresEmailConfirmation = !data.session && data.user;
+
+    return NextResponse.json(
+      {
+        user: data.user,
+        requiresEmailConfirmation,
+        email: data.user?.email,
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     console.error("회원가입 오류:", error);
     return NextResponse.json(
